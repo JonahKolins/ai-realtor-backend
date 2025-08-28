@@ -1,0 +1,38 @@
+// Prisma schema file for AI Realtor Backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id           String   @id @default(uuid())
+  type         ListingType
+  status       ListingStatus @default(DRAFT)
+  title        String?  @db.VarChar(200)
+  price        Decimal? @db.Decimal(14,2)
+  userFields   Json?    // произвольные поля пользователя (city, floor, balcony и т.п.)
+  aiHints      Json?    // зарезервировано под будущие подсказки ИИ
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  @@index([status, createdAt])
+  @@index([type])
+  @@map("listings")
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum ListingStatus {
+  DRAFT
+  READY
+  ARCHIVED
+}

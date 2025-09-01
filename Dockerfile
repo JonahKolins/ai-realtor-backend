@@ -3,7 +3,8 @@ FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# Устанавливаем OpenSSL и другие зависимости для Prisma
+RUN apk add --no-cache libc6-compat openssl openssl-dev
 WORKDIR /app
 
 # Copy package files
@@ -12,6 +13,8 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Rebuild the source code only when needed
 FROM base AS builder
+# Устанавливаем OpenSSL для Prisma
+RUN apk add --no-cache openssl openssl-dev libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
@@ -26,6 +29,8 @@ RUN npm run build
 
 # Production image, copy all the files and run the application
 FROM base AS runner
+# Устанавливаем OpenSSL в финальном образе
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 ENV NODE_ENV=production

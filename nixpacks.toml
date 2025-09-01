@@ -1,15 +1,21 @@
 [phases.setup]
-nixPkgs = ["...", "openssl"]
+nixPkgs = ["openssl", "openssl.dev", "pkg-config"]
+
+[phases.install]
+cmds = [
+  "npm ci"
+]
 
 [phases.build]
 cmds = [
-  "npm ci",
   "npm run build",
   "npx prisma generate"
 ]
 
 [phases.start]
-cmd = "npm run start:railway"
+cmd = "npm run start:railway-alt"
 
 [variables]
 NODE_ENV = "production"
+OPENSSL_LIB_DIR = "/nix/store/*/lib"
+OPENSSL_INCLUDE_DIR = "/nix/store/*/include"

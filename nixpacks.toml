@@ -13,7 +13,7 @@ cmds = [
 ]
 
 [phases.start]
-cmd = "npm run start:railway-alt"
+cmd = "npm run start:railway"
 
 [variables]
 NODE_ENV = "production"

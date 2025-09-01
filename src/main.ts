@@ -5,6 +5,15 @@ import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Проверка критически важных переменных окружения
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: DATABASE_URL не найдена!');
+    console.error('📋 Убедитесь что PostgreSQL добавлен в Railway проект');
+    process.exit(1);
+  }
+
+  console.log('✅ DATABASE_URL настроена корректно');
+  
   const app = await NestFactory.create(AppModule, {
     logger: process.env.NODE_ENV === 'development' 
       ? ['log', 'debug', 'error', 'verbose', 'warn'] 

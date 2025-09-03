@@ -33,9 +33,8 @@
 NODE_ENV=production
 PORT=4000
 API_PREFIX=/api/v1
-# CORS - обновите на URL вашего фронтенда:
-CORS_ORIGIN=https://your-frontend-app.up.railway.app
-# Для разработки: CORS_ORIGIN=http://localhost:3000
+# CORS - множественные домены через запятую:
+CORS_ORIGIN=http://localhost:3000,https://casalabia.dev,https://www.casalabia.dev
 APP_VERSION=0.1.0
 MAX_UPLOAD_MB=25
 FEATURES_LISTINGS=true

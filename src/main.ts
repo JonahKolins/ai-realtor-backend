@@ -29,10 +29,22 @@ async function bootstrap() {
     exclude: ['health'], // health endpoint should be without prefix
   });
 
-  // CORS configuration
-  const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:3000');
+  // CORS configuration - поддержка множественных доменов
+  const corsOriginEnv = configService.get<string>('CORS_ORIGIN', 'http://localhost:3000');
+  const corsOrigins = corsOriginEnv.split(',').map(origin => origin.trim());
+  
   app.enableCors({
-    origin: corsOrigin,
+    origin: (origin, callback) => {
+      // Разрешаем запросы без origin (например, мобильные приложения)
+      if (!origin) return callback(null, true);
+      
+      // Проверяем, есть ли origin в разрешенном списке
+      if (corsOrigins.includes(origin) || corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
@@ -64,9 +76,10 @@ async function bootstrap() {
   logger.log(`💗 Health check: http://localhost:${port}/health`);
   logger.log(`⚙️  Config endpoint: http://localhost:${port}${apiPrefix}/config`);
   logger.log(`📋 Listings API: http://localhost:${port}${apiPrefix}/listings`);
+  logger.log(`🌍 CORS enabled for: ${corsOrigins.join(', ')}`);
   
   if (process.env.NODE_ENV === 'development') {
-    logger.log(`🌍 CORS enabled for: ${corsOrigin}`);
+    logger.log(`🔧 Development mode: Additional logging enabled`);
   }
 }
 

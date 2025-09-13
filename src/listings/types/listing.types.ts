@@ -9,6 +9,20 @@ export enum ListingStatus {
   ARCHIVED = 'archived',
 }
 
+// Константы для типов недвижимости (для валидации)
+export const PROPERTY_TYPES = [
+  'default',
+  'house',
+  'apartment', 
+  'room',
+  'cellar',
+  'garage',
+  'parking',
+  'commercial'
+] as const;
+
+export type PropertyType = typeof PROPERTY_TYPES[number];
+
 export enum ListingSortOrder {
   CREATED_AT_ASC = 'createdAt',
   CREATED_AT_DESC = '-createdAt',

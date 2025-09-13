@@ -13,6 +13,7 @@ datasource db {
 model Listing {
   id           String   @id @default(uuid())
   type         ListingType
+  propertyType String?  @db.VarChar(50) @default("default") // тип недвижимости (гибкое поле)
   status       ListingStatus @default(DRAFT)
   title        String?  @db.VarChar(200)
   price        Decimal? @db.Decimal(14,2)
@@ -24,6 +25,7 @@ model Listing {
 
   @@index([status, createdAt])
   @@index([type])
+  @@index([propertyType])
   @@map("listings")
 }
 

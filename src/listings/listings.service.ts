@@ -25,6 +25,7 @@ export class ListingsService {
     const listing = await this.prisma.listing.create({
       data: {
         type: this.mapTypeToEnum(createListingDto.type),
+        propertyType: createListingDto.propertyType || 'default',
         title: createListingDto.title,
         price: createListingDto.price,
         userFields: createListingDto.userFields,
@@ -36,7 +37,7 @@ export class ListingsService {
   }
 
   async findMany(query: ListListingsDto): Promise<ListListingsResponseDto> {
-    const { page, limit, status, type, q, sort } = query;
+    const { page, limit, status, type, propertyType, q, sort } = query;
     const skip = (page - 1) * limit;
 
     // Построение фильтров
@@ -50,6 +51,10 @@ export class ListingsService {
 
     if (type) {
       where.type = this.mapTypeToEnum(type);
+    }
+
+    if (propertyType) {
+      where.propertyType = propertyType;
     }
 
     if (q) {
@@ -124,6 +129,10 @@ export class ListingsService {
       updateData.type = this.mapTypeToEnum(updateListingDto.type);
     }
 
+    if (updateListingDto.propertyType !== undefined) {
+      updateData.propertyType = updateListingDto.propertyType;
+    }
+
     if (updateListingDto.status) {
       updateData.status = this.mapStatusToEnum(updateListingDto.status);
     }
@@ -173,6 +182,7 @@ export class ListingsService {
     return {
       id: listing.id,
       type: this.mapTypeFromEnum(listing.type),
+      propertyType: listing.propertyType,
       status: this.mapStatusFromEnum(listing.status),
       title: listing.title,
       price: listing.price ? Number(listing.price) : null,

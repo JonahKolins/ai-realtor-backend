@@ -50,6 +50,7 @@ export class ListingsController {
   @ApiOperation({ summary: 'Получить список листингов с фильтрацией и пагинацией' })
   @ApiQuery({ name: 'status', required: false, description: 'Фильтр по статусу' })
   @ApiQuery({ name: 'type', required: false, description: 'Фильтр по типу' })
+  @ApiQuery({ name: 'propertyType', required: false, description: 'Фильтр по типу недвижимости' })
   @ApiQuery({ name: 'q', required: false, description: 'Поиск по заголовку' })
   @ApiQuery({ name: 'page', required: false, description: 'Номер страницы' })
   @ApiQuery({ name: 'limit', required: false, description: 'Количество элементов на странице' })

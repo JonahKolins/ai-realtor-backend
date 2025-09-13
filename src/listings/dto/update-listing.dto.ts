@@ -7,9 +7,10 @@ import {
   IsObject,
   MaxLength,
   Min,
+  IsIn,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ListingType, ListingStatus } from '../types/listing.types';
+import { ListingType, ListingStatus, PROPERTY_TYPES } from '../types/listing.types';
 
 export class UpdateListingDto {
   @ApiProperty({
@@ -21,6 +22,19 @@ export class UpdateListingDto {
   @IsOptional()
   @IsEnum(ListingType, { message: 'Type must be either "sale" or "rent"' })
   type?: ListingType;
+
+  @ApiProperty({
+    description: 'Тип недвижимости',
+    enum: PROPERTY_TYPES,
+    example: 'house',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(PROPERTY_TYPES, { 
+    message: `Property type must be one of: ${PROPERTY_TYPES.join(', ')}` 
+  })
+  propertyType?: string;
 
   @ApiProperty({
     description: 'Статус листинга',

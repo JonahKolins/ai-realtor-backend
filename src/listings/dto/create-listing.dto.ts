@@ -8,9 +8,10 @@ import {
   MaxLength,
   Min,
   IsNotEmpty,
+  IsIn,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ListingType } from '../types/listing.types';
+import { ListingType, PROPERTY_TYPES } from '../types/listing.types';
 
 export class CreateListingDto {
   @ApiProperty({
@@ -21,6 +22,19 @@ export class CreateListingDto {
   @IsEnum(ListingType, { message: 'Type must be either "sale" or "rent"' })
   @IsNotEmpty()
   type: ListingType;
+
+  @ApiProperty({
+    description: 'Тип недвижимости',
+    enum: PROPERTY_TYPES,
+    example: 'apartment',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(PROPERTY_TYPES, { 
+    message: `Property type must be one of: ${PROPERTY_TYPES.join(', ')}` 
+  })
+  propertyType?: string;
 
   @ApiProperty({
     description: 'Заголовок объявления',

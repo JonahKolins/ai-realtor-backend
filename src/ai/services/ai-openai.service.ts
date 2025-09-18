@@ -50,10 +50,10 @@ export class AiOpenaiService {
     const startTime = Date.now();
 
     // Проверяем тестовый режим
-    const apiKey = this.configService.get<string>('ai.openai.apiKey');
-    if (apiKey?.startsWith('sk-test-')) {
-      return this.createMockResponse(requestId, startTime, request);
-    }
+    // const apiKey = this.configService.get<string>('ai.openai.apiKey');
+    // if (apiKey?.startsWith('sk-test-')) {
+    //   return this.createMockResponse(requestId, startTime, request);
+    // }
 
     try {
       this.logger.log(`AI request started`, {
@@ -68,7 +68,7 @@ export class AiOpenaiService {
         response_format: request.responseFormat === 'json_object' 
           ? { type: 'json_object' } 
           : { type: 'text' },
-        temperature: 0.7,
+        temperature: 1,
         max_completion_tokens: 2000,
       });
 

@@ -101,6 +101,34 @@ export class ListingsService {
     return this.mapToResponse(listing);
   }
 
+  async getByIdForOwner(id: string, userId?: string): Promise<any> {
+    const listing = await this.prisma.listing.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        // В будущем можно добавить проверку владельца
+        // ...(userId && { ownerId: userId }),
+      },
+    });
+
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+
+    // Возвращаем полные данные для AI (включая все поля)
+    return {
+      id: listing.id,
+      type: listing.type,
+      propertyType: listing.propertyType,
+      status: listing.status,
+      title: listing.title,
+      price: listing.price ? Number(listing.price) : null,
+      userFields: listing.userFields as Record<string, any> | null,
+      createdAt: listing.createdAt,
+      updatedAt: listing.updatedAt,
+    };
+  }
+
   async update(id: string, updateListingDto: UpdateListingDto): Promise<ListingResponseDto> {
     // Сначала получим существующий листинг
     const existingListing = await this.prisma.listing.findFirst({

@@ -19,11 +19,16 @@ import {
   ListingResponseDto, 
   ListListingsResponseDto 
 } from './dto/list-listings.dto';
+import { GenerateDraftDto, ListingDraftDto } from './dto/generate-draft.dto';
+import { AiDraftService } from '../ai/services/ai-draft.service';
 
 @ApiTags('Listings')
 @Controller('listings')
 export class ListingsController {
-  constructor(private readonly listingsService: ListingsService) {}
+  constructor(
+    private readonly listingsService: ListingsService,
+    private readonly aiDraftService: AiDraftService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Создать новый черновик листинга' })
@@ -141,5 +146,84 @@ export class ListingsController {
   })
   async remove(@Param('id') id: string): Promise<void> {
     return this.listingsService.softDelete(id);
+  }
+
+  @Post(':id/generate-draft')
+  @ApiOperation({ summary: 'Генерировать AI-описание для листинга' })
+  @ApiParam({ name: 'id', description: 'ID листинга' })
+  @ApiResponse({
+    status: 200,
+    description: 'AI-описание успешно сгенерировано',
+    type: ListingDraftDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Неверные параметры или невалидный ответ модели',
+    example: {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid request parameters'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Нет прав доступа',
+    example: {
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Access denied'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Объявление не найдено',
+    example: {
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Listing not found'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Превышен лимит запросов',
+    example: {
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Rate limit exceeded'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 502,
+    description: 'Ошибка провайдера LLM',
+    example: {
+      error: {
+        code: 'LLM_PROVIDER_ERROR',
+        message: 'LLM provider error'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Внутренняя ошибка сервера',
+    example: {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    }
+  })
+  async generateDraft(
+    @Param('id') id: string,
+    @Body() generateDraftDto: GenerateDraftDto,
+  ): Promise<ListingDraftDto> {
+    // Получение полных данных листинга для AI
+    const listing = await this.listingsService.getByIdForOwner(id);
+    
+    // Генерация AI-описания
+    return this.aiDraftService.generateDraft(listing, generateDraftDto);
   }
 }

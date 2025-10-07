@@ -7,4 +7,6 @@ export default registerAs('ai', () => ({
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   },
   rateLimitPerMinute: parseInt(process.env.AI_RATE_LIMIT_PER_MINUTE || '60', 10),
+  refineEnabled: process.env.AI_REFINE_ENABLED === 'true',
+  qualityThreshold: parseFloat(process.env.AI_QUALITY_THRESHOLD || '0.7'),
 }));

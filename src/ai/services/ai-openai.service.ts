@@ -6,6 +6,10 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 export interface ChatCompletionRequest {
   messages: ChatCompletionMessageParam[];
   responseFormat?: 'json_object' | 'text';
+  temperature?: number;
+  maxTokens?: number;
+  frequencyPenalty?: number;
+  topP?: number;
 }
 
 export interface ChatCompletionResponse {
@@ -68,8 +72,10 @@ export class AiOpenaiService {
         response_format: request.responseFormat === 'json_object' 
           ? { type: 'json_object' } 
           : { type: 'text' },
-        temperature: 1,
-        max_completion_tokens: 2000,
+        temperature: request.temperature ?? 0.6,
+        max_completion_tokens: request.maxTokens ?? 2000,
+        frequency_penalty: request.frequencyPenalty ?? 0.2,
+        top_p: request.topP ?? 0.8,
       });
 
       const responseTime = Date.now() - startTime;

@@ -61,9 +61,7 @@ export class AiDraftService {
       const draftResponse = await this.aiOpenaiService.createChatCompletion({
         messages,
         responseFormat: 'json_object',
-        temperature: 0.6,
-        frequencyPenalty: 0.2,
-        topP: 0.8,
+        // Используем дефолты из конфига (0.6, 0.2, 0.8)
       });
 
       // Парсинг и валидация черновика
@@ -170,9 +168,9 @@ export class AiDraftService {
       const refineResponse = await this.aiOpenaiService.createChatCompletion({
         messages: refineMessages,
         responseFormat: 'json_object',
-        temperature: 0.5,
-        frequencyPenalty: 0.3,
-        topP: 0.8,
+        temperature: 0.5,  // Более консервативно для refine
+        frequencyPenalty: 0.3,  // Меньше повторений
+        // topP использует дефолт из конфига (0.8)
       });
 
       const refinedDraft = await this.parseAndValidateDraft(refineResponse.content, requestId);
@@ -291,6 +289,28 @@ export class AiDraftService {
     return terms;
   }
 
+  private stripSectionLabels(description: string): string {
+    const markers = [
+      /^\s*Intro(?:\s*[—\-:]|\s*essenziali)?\s*/i,
+      /^\s*Interni(?:\s*[—\-:])?\s*/i,
+      /^\s*Esterni(?:\/Servizi)?(?:\s*[—\-:])?\s*/i,  // Ловит и "Esterni:" и "Esterni/Servizi:"
+      /^\s*Zona(?:\/Trasporti)?(?:\s*[—\-:])?\s*/i,   // Ловит и "Zona:" и "Zona/Trasporti:"
+      /^\s*Termini(?:\s*essenziali)?(?:\s*[—\-:])?\s*/i,
+    ];
+    
+    return description
+      .split(/\n{2,}/)
+      .map(paragraph => {
+        let cleaned = paragraph.trim();
+        for (const regex of markers) {
+          cleaned = cleaned.replace(regex, '');
+        }
+        return cleaned.trim();
+      })
+      .filter(p => p.length > 0)
+      .join('\n\n');
+  }
+
   private sanitizeContent(draft: ListingDraftDto, length: Length): ListingDraftDto {
     // Расширенный список запрещенных терминов
     const prohibitedTerms = [
@@ -349,7 +369,8 @@ export class AiDraftService {
       summary = summaryWords.slice(0, summaryLimits.max).join(' ') + '...';
     }
 
-    const description = sanitize(draft.description);
+    // Удаляем ярлыки секций (БЕЗ sanitize чтобы сохранить \n\n)
+    const description = this.stripSectionLabels(draft.description);
 
     // Фильтрация highlights
     const highlights = draft.highlights

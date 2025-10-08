@@ -31,6 +31,9 @@ export class AiPromptService {
     const contentPlan = this.generateContentPlan(length);
     const mustCover = this.generateMustCover(listing, language);
     
+    // Few-shot pair (user + assistant example)
+    const fewShotPair = this.buildFewShotPair(language);
+    
     return [
       {
         role: 'system',
@@ -40,6 +43,9 @@ export class AiPromptService {
         role: 'developer',
         content: this.buildDeveloperPrompt(language, contentPlan),
       },
+      // Few-shot examples
+      ...fewShotPair,
+      // Actual request
       {
         role: 'user',
         content: this.buildUserPrompt(listing, contentPlan, mustCover, language),
@@ -121,56 +127,80 @@ export class AiPromptService {
     const toneInstructions = this.getToneInstructions(tone, language);
 
     if (language === 'it') {
-      return `Sei un senior copywriter immobiliare specializzato nella creazione di annunci immobiliari professionali e densi di contenuto in italiano.
+      return `Sei un senior copywriter immobiliare specializzato nella creazione di annunci professionali in italiano.
 
-REGOLE GENERALI:
-- Scrivi sempre in italiano fluente e naturale
+REGOLE FONDAMENTALI:
+- Scrivi in italiano fluente e naturale
 - ${toneInstructions}
-- Sii CONCRETO e FATTUALE: ogni frase deve contenere almeno 1-2 fatti specifici dai dati forniti
-- Usa unità metriche (m²) e minuti a piedi per le distanze
-- NON inventare MAI informazioni non fornite - se mancano dati, ometti quella sezione
-- Usa linguaggio inclusivo, rispettoso e giuridicamente sicuro
-- VIETATO: garanzie assolute, superlativi non dimostrabili, discriminazione, termini medici
-- Niente markdown, emoji o campi extra nel JSON
+- Usa metrica (m²) e minuti a piedi
+- Sii FATTUALE: ogni frase ≥1-2 fatti dai dati forniti
 
-DENSITÀ DEL CONTENUTO:
-- Ogni paragrafo deve contenere ≥2 fatti concreti
-- Evita frasi generiche come "ottima posizione" senza specificare perché
-- Preferisci "balcone 8 m² affaccio su giardino" a "bel balcone"`;
+VIETATO INCLUDERE SE NON NEI DATI:
+- Indirizzi completi, numeri civici, CAP, numeri appartamento
+- Nomi di brand, catene commerciali, costruttori
+- Materiali/finiture, IPE specifici, marche infissi
+- Dettagli tecnici (portineria, videosorveglianza, impianti specifici)
+- Garanzie ("garantito", "sicuro al 100%")
+- Superlativi non dimostrabili ("migliore della zona", "unico")
+- Discriminazione (famiglia, nazionalità, età)
+- Dati personali del proprietario/arrendatore
+
+AMMESSI:
+- Formule prudenziali: "circa", "indicativamente", "secondo i dati forniti"
+- Solo fatti esplicitamente presenti nei dati
+- Metrature e tempi solo se numericamente indicati
+
+Se un dato manca: ometti quella parte, NON inventare.`;
     } else if (language === 'ru') {
-      return `Вы старший копирайтер по недвижимости, специализирующийся на создании профессиональных и насыщенных фактами объявлений о недвижимости на русском языке.
+      return `Вы старший копирайтер по недвижимости, специализирующийся на создании профессиональных объявлений на русском языке.
 
-ОБЩИЕ ПРАВИЛА:
-- Всегда пишите на естественном русском языке
+ОСНОВНЫЕ ПРАВИЛА:
+- Пишите на естественном русском языке
 - ${toneInstructions}
-- Будьте КОНКРЕТНЫ и ФАКТОЛОГИЧНЫ: каждое предложение должно содержать ≥1-2 факта из предоставленных данных
-- Используйте метрические единицы (м²) и минуты пешком для расстояний
-- НИКОГДА не придумывайте информацию - если данных нет, опустите эту секцию
-- Используйте инклюзивный, уважительный и юридически безопасный язык
-- ЗАПРЕЩЕНО: абсолютные гарантии, недоказуемые превосходные степени, дискриминация, медицинские термины
-- Никакого markdown, эмодзи или лишних полей в JSON
+- Используйте метрику (м²) и минуты пешком
+- Будьте ФАКТОЛОГИЧНЫ: каждое предложение ≥1-2 факта из данных
 
-ПЛОТНОСТЬ КОНТЕНТА:
-- Каждый параграф должен содержать ≥2 конкретных факта
-- Избегайте общих фраз вроде "отличное расположение" без конкретики
-- Предпочитайте "балкон 8 м² с видом на сад" вместо "хороший балкон"`;
+ЗАПРЕЩЕНО ВКЛЮЧАТЬ ЕСЛИ НЕТ В ДАННЫХ:
+- Полные адреса, номера домов, индексы, номера квартир
+- Названия брендов, коммерческих сетей, застройщиков
+- Материалы/отделка, конкретные IPE, марки окон
+- Технические детали (консьерж, видеонаблюдение, конкретные системы)
+- Гарантии ("гарантировано", "100% безопасно")
+- Недоказуемые превосходные степени ("лучший в районе", "единственный")
+- Дискриминация (семья, национальность, возраст)
+- Персональные данные владельца/арендатора
+
+ДОПУСТИМО:
+- Осторожные формулировки: "около", "ориентировочно", "по предоставленным данным"
+- Только факты явно присутствующие в данных
+- Площади и время только если указаны численно
+
+Если данных нет: опустите эту часть, НЕ придумывайте.`;
     } else { // English fallback
-      return `You are a senior real-estate copywriter specialized in creating professional, fact-dense real estate listings in English.
+      return `You are a senior real-estate copywriter specialized in creating professional listings in English.
 
-GENERAL RULES:
-- Always write in fluent and natural English
+FUNDAMENTAL RULES:
+- Write in fluent and natural English
 - ${toneInstructions}
-- Be CONCRETE and FACTUAL: every sentence must contain ≥1-2 specific facts from provided data
-- Use metric units (m²) and walking minutes for distances
-- NEVER invent information not provided - if data is missing, omit that section
-- Use inclusive, respectful and legally safe language
-- FORBIDDEN: absolute guarantees, unprovable superlatives, discrimination, medical claims
-- No markdown, emoji or extra JSON fields
+- Use metrics (m²) and walking minutes
+- Be FACTUAL: every sentence ≥1-2 facts from provided data
 
-CONTENT DENSITY:
-- Each paragraph must contain ≥2 concrete facts
-- Avoid generic phrases like "great location" without specifics
-- Prefer "8 m² balcony overlooking garden" to "nice balcony"`;
+FORBIDDEN TO INCLUDE IF NOT IN DATA:
+- Complete addresses, street numbers, postal codes, apartment numbers
+- Brand names, commercial chains, developers
+- Materials/finishes, specific IPE, window brands
+- Technical details (concierge, video surveillance, specific systems)
+- Guarantees ("guaranteed", "100% safe")
+- Unprovable superlatives ("best in area", "unique")
+- Discrimination (family, nationality, age)
+- Personal data of owner/tenant
+
+ALLOWED:
+- Prudential formulas: "approximately", "indicatively", "according to data provided"
+- Only facts explicitly present in data
+- Areas and times only if numerically indicated
+
+If data is missing: omit that part, DO NOT invent.`;
     }
   }
 
@@ -311,45 +341,47 @@ FORBIDDEN:
       userFields: listing.userFields || {},
     };
 
-    const fewShotExample = this.getFewShotExample(language);
-
     const promptText = language === 'it'
-      ? `Crea un annuncio immobiliare denso di contenuto per questa proprietà.
+      ? `Crea un annuncio immobiliare per questa proprietà.
 
 DATI PROPRIETÀ:
 ${JSON.stringify(listingData, null, 2)}
 
-PIANO DEI CONTENUTI (obiettivi di parole per paragrafo):
+PIANO DEI CONTENUTI (target parole per paragrafo):
 ${JSON.stringify(contentPlan, null, 2)}
 
-ELEMENTI DA COPRIRE OBBLIGATORIAMENTE (se presenti nei dati):
-${mustCover.required.length > 0 ? mustCover.required.join(', ') : 'Nessuno'}
+MUST COVER (obbligatori se presenti):
+${mustCover.required.length > 0 ? mustCover.required.join('; ') : 'Nessuno'}
 
-ELEMENTI OPZIONALI DA INCLUDERE (se presenti):
-${mustCover.optional.length > 0 ? mustCover.optional.join(', ') : 'Nessuno'}
+OPZIONALI (se presenti):
+${mustCover.optional.length > 0 ? mustCover.optional.join('; ') : 'Nessuno'}
 
-${fewShotExample}
-
-Ora genera l'annuncio per la proprietà sopra, seguendo rigorosamente il contratto strutturale.`
+IMPORTANTE: 
+- Usa SOLO i dati sopra riportati
+- Se un dato manca (indirizzo, materiali, brand, ecc.) NON inventarlo
+- Rispetta rigorosamente il contratto strutturale JSON
+- Mantieni le etichette di sezione (Intro:, Interni:, etc.) all'inizio di ogni paragrafo`
       : language === 'ru'
-      ? `Создайте насыщенное объявление о недвижимости для этой собственности.
+      ? `Создайте объявление о недвижимости для этой собственности.
 
 ДАННЫЕ НЕДВИЖИМОСТИ:
 ${JSON.stringify(listingData, null, 2)}
 
-ПЛАН КОНТЕНТА (целевые слова для параграфов):
+ПЛАН КОНТЕНТА (целевые слова на параграф):
 ${JSON.stringify(contentPlan, null, 2)}
 
-ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ ДЛЯ ОСВЕЩЕНИЯ (если есть в данных):
-${mustCover.required.length > 0 ? mustCover.required.join(', ') : 'Нет'}
+MUST COVER (обязательно если есть):
+${mustCover.required.length > 0 ? mustCover.required.join('; ') : 'Нет'}
 
-ОПЦИОНАЛЬНЫЕ ЭЛЕМЕНТЫ ДЛЯ ВКЛЮЧЕНИЯ (если есть):
-${mustCover.optional.length > 0 ? mustCover.optional.join(', ') : 'Нет'}
+ОПЦИОНАЛЬНО (если есть):
+${mustCover.optional.length > 0 ? mustCover.optional.join('; ') : 'Нет'}
 
-${fewShotExample}
-
-Теперь создайте объявление для указанной выше недвижимости, строго следуя структурному контракту.`
-      : `Create a fact-dense real estate listing for this property.
+ВАЖНО:
+- Используйте ТОЛЬКО данные указанные выше
+- Если данных нет (адрес, материалы, бренды и т.п.) НЕ придумывайте
+- Строго соблюдайте структурный контракт JSON
+- Сохраняйте метки секций (Intro:, Interni:, etc.) в начале каждого параграфа`
+      : `Create a real estate listing for this property.
 
 PROPERTY DATA:
 ${JSON.stringify(listingData, null, 2)}
@@ -357,71 +389,130 @@ ${JSON.stringify(listingData, null, 2)}
 CONTENT PLAN (target words per paragraph):
 ${JSON.stringify(contentPlan, null, 2)}
 
-MUST COVER ITEMS (if present in data):
-${mustCover.required.length > 0 ? mustCover.required.join(', ') : 'None'}
+MUST COVER (required if present):
+${mustCover.required.length > 0 ? mustCover.required.join('; ') : 'None'}
 
-OPTIONAL ITEMS TO INCLUDE (if present):
-${mustCover.optional.length > 0 ? mustCover.optional.join(', ') : 'None'}
+OPTIONAL (if present):
+${mustCover.optional.length > 0 ? mustCover.optional.join('; ') : 'None'}
 
-${fewShotExample}
-
-Now generate the listing for the above property, strictly following the structural contract.`;
+IMPORTANT:
+- Use ONLY the data provided above
+- If data is missing (address, materials, brands, etc.) DO NOT invent it
+- Strictly follow the JSON structural contract
+- Keep section labels (Intro:, Interni:, etc.) at start of each paragraph`;
 
     return promptText;
   }
 
-  private getFewShotExample(language: string): string {
+  buildFewShotPair(language: string): ChatCompletionMessageParam[] {
     if (language === 'it') {
-      return `ESEMPIO DI STILE (riferimento per densità e concretezza):
-
-Input: Trilocale 85 m², 3° piano con ascensore, balcone 8 m², riscaldamento autonomo, classe B, Via Bergognone 15 Milano (Porta Romana), metro Romolo 3 min a piedi, parco 5 min, €320k vendita, spese cond. €80/mese
-
-Output description (esempio):
-"Trilocale ristrutturato di 85 m² in Via Bergognone 15, zona Porta Romana, Milano. Terzo piano di palazzina anni '60 con ascensore, classe energetica B, riscaldamento autonomo a metano.
-
-Gli spazi interni includono soggiorno 25 m² con angolo cottura, due camere da letto (14 m² e 12 m²), bagno completo con doccia e antibagno. Pavimenti in gres porcellanato, infissi in PVC doppio vetro sostituiti nel 2021, porte interne laccate bianche.
-
-Balcone 8 m² affaccio su cortile interno silenzioso, ideale per pranzi all'aperto. Cantina 4 m² al piano interrato inclusa. Portineria part-time dal lunedì al venerdì.
-
-Posizione strategica a 3 minuti a piedi dalla metro M2 Romolo, 5 minuti dal Parco Ravizza (10 ettari), supermercati Esselunga e Carrefour entro 300 metri. Fermata tram 3 davanti al portone. Zona servita da scuole primarie e asilo nido comunale.
-
-Prezzo di vendita €320.000, spese condominiali €80 al mese. Disponibilità immediata, libero da vincoli. APE classe B, IPE 45 kWh/m²anno."
-
-highlights: ["85 m² piano 3° con ascensore", "Balcone 8 m² cortile silenzioso", "Metro Romolo a 3 min piedi", "Riscaldamento autonomo classe B", "Ristrutturato infissi nuovi 2021", "Parco Ravizza 5 min a piedi", "€320k spese cond €80/mese"]`;
+      return [
+        {
+          role: 'user',
+          content: `Facts:
+- Tipo: vendita, tipologia: trilocale
+- Superficie: 72 m²
+- Piano: 3° con ascensore
+- Spazi esterni: balcone 8 m²
+- Riscaldamento: centralizzato; Classe energetica: C
+- Zona: Navigli (Milano)
+- Distanze a piedi: metro 5 min, parco 1 min
+- Spese condominiali: €150/mese
+- Prezzo: su richiesta`
+        },
+        {
+          role: 'assistant',
+          content: JSON.stringify({
+            title: "Trilocale 72 m² con balcone, 3° piano con ascensore — Navigli",
+            summary: "In zona Navigli, trilocale di 72 m² al 3° piano con ascensore. Balcone 8 m², riscaldamento centralizzato, classe C. Metro a 5 minuti a piedi; area verde a 1 minuto. Spese condominiali €150/mese. Prezzo su richiesta.",
+            description: "Intro: Trilocale funzionale di 72 m² nel cuore dei Navigli, al terzo piano di stabile servito da ascensore, ideale per chi desidera servizi e collegamenti a portata di mano.\n\nInterni: Soggiorno con zona pranzo e cucina, due camere e bagno. Ambienti luminosi e ben distribuiti; riscaldamento centralizzato; classe energetica C.\n\nEsterni/Servizi: Balcone vivibile di 8 m², utile per colazioni all'aperto. Stabile ben tenuto con servizi condominiali.\n\nZona/Trasporti: Negozi e locali nelle vicinanze; metropolitana raggiungibile in circa 5 minuti a piedi; area verde a 1 minuto per passeggiate e sport.\n\nTermini essenziali: Spese condominiali €150/mese; prezzo su richiesta. Informazioni indicative e non vincolanti.",
+            highlights: [
+              "72 m² 3° piano con ascensore",
+              "Balcone 8 m²",
+              "Classe energetica C",
+              "Metro a 5 minuti",
+              "Spese cond. €150/mese"
+            ],
+            disclaimer: "Le informazioni sono indicative e non costituiscono elemento contrattuale.",
+            seo: {
+              keywords: ["trilocale", "Navigli", "Milano", "balcone", "ascensore", "classe C"],
+              metaDescription: "Trilocale 72 m² con balcone ai Navigli, 3° piano con ascensore e classe C. Metro a 5 minuti. Spese condominiali €150/mese. Prezzo su richiesta."
+            }
+          }, null, 0)
+        }
+      ];
     } else if (language === 'ru') {
-      return `ПРИМЕР СТИЛЯ (референс для плотности и конкретности):
-
-Input: Трехкомнатная 85 м², 3 этаж с лифтом, балкон 8 м², автономное отопление, класс B, Via Bergognone 15 Милан (Порта Романа), метро Ромоло 3 мин пешком, парк 5 мин, €320k продажа, кондо €80/мес
-
-Output description (пример):
-"Трехкомнатная квартира 85 м² после ремонта на Via Bergognone 15, район Порта Романа, Милан. Третий этаж здания 1960-х с лифтом, энергокласс B, автономное газовое отопление.
-
-Внутренние пространства включают гостиную 25 м² с кухонной зоной, две спальни (14 м² и 12 м²), полная ванная с душем и прихожая. Керамогранитные полы, окна ПВХ с двойным остеклением заменены в 2021 году, межкомнатные двери белые лакированные.
-
-Балкон 8 м² с видом на тихий внутренний двор, идеален для обедов на свежем воздухе. Кладовая 4 м² в подвале включена. Консьерж по будням.
-
-Стратегическое расположение в 3 минутах пешком от метро M2 Ромоло, 5 минут до парка Равицца (10 га), супермаркеты Esselunga и Carrefour в 300 метрах. Трамвайная остановка 3 у входа. Район с начальными школами и муниципальным детсадом.
-
-Цена продажи €320,000, кондо-платежи €80 в месяц. Свободна сразу, без обременений. APE класс B, IPE 45 кВтч/м²год."
-
-highlights: ["85 м² 3 этаж с лифтом", "Балкон 8 м² тихий двор", "Метро Ромоло 3 мин пешком", "Автономное отопление класс B", "Ремонт новые окна 2021", "Парк Равицца 5 мин пешком", "€320k кондо €80/мес"]`;
-    } else {
-      return `STYLE EXAMPLE (reference for density and concreteness):
-
-Input: 3-room 85 m², 3rd floor with elevator, 8 m² balcony, independent heating, class B, Via Bergognone 15 Milan (Porta Romana), metro Romolo 3 min walk, park 5 min, €320k sale, condo €80/month
-
-Output description (example):
-"Renovated 3-room apartment 85 m² at Via Bergognone 15, Porta Romana area, Milan. Third floor of 1960s building with elevator, energy class B, independent gas heating.
-
-Interior spaces include 25 m² living room with kitchenette, two bedrooms (14 m² and 12 m²), full bathroom with shower and hallway. Porcelain tile floors, PVC double-glazed windows replaced in 2021, white lacquered interior doors.
-
-8 m² balcony overlooking quiet internal courtyard, ideal for outdoor dining. 4 m² cellar in basement included. Part-time concierge weekdays.
-
-Strategic location 3 minutes walk from M2 Romolo metro, 5 minutes to Ravizza Park (10 hectares), Esselunga and Carrefour supermarkets within 300 meters. Tram 3 stop at entrance. Area served by primary schools and municipal nursery.
-
-Sale price €320,000, condo fees €80 per month. Immediate availability, free of encumbrances. APE class B, IPE 45 kWh/m²year."
-
-highlights: ["85 m² 3rd floor with elevator", "8 m² balcony quiet courtyard", "Metro Romolo 3 min walk", "Independent heating class B", "Renovated new windows 2021", "Ravizza Park 5 min walk", "€320k condo €80/month"]`;
+      return [
+        {
+          role: 'user',
+          content: `Facts:
+- Тип: продажа, типология: трехкомнатная
+- Площадь: 72 м²
+- Этаж: 3 с лифтом
+- Открытые пространства: балкон 8 м²
+- Отопление: централизованное; Энергокласс: C
+- Район: Навильи (Милан)
+- Расстояния пешком: метро 5 мин, парк 1 мин
+- Кондо-платежи: €150/мес
+- Цена: по запросу`
+        },
+        {
+          role: 'assistant',
+          content: JSON.stringify({
+            title: "Трехкомнатная 72 м² с балконом, 3 этаж с лифтом — Навильи",
+            summary: "В районе Навильи, трехкомнатная квартира 72 м² на 3 этаже с лифтом. Балкон 8 м², централизованное отопление, класс C. Метро в 5 минутах пешком; зеленая зона в 1 минуте. Кондо-платежи €150/мес. Цена по запросу.",
+            description: "Intro: Функциональная трехкомнатная квартира 72 м² в сердце Навильи, на третьем этаже здания с лифтом, идеальна для тех, кто ценит услуги и транспорт в шаговой доступности.\n\nInterni: Гостиная с обеденной зоной и кухней, две спальни и ванная комната. Светлые и хорошо распределенные помещения; централизованное отопление; энергокласс C.\n\nEsterni/Servizi: Жилой балкон 8 м², удобный для завтраков на свежем воздухе. Ухоженное здание с кондоминиумными услугами.\n\nZona/Trasporti: Магазины и заведения поблизости; метро в примерно 5 минутах пешком; зеленая зона в 1 минуте для прогулок и спорта.\n\nTermini: Кондо-платежи €150/мес; цена по запросу. Информация ориентировочная и не является обязательством.",
+            highlights: [
+              "72 м² 3 этаж с лифтом",
+              "Балкон 8 м²",
+              "Энергокласс C",
+              "Метро 5 минут",
+              "Кондо €150/мес"
+            ],
+            disclaimer: "Информация носит ориентировочный характер и не является договорным обязательством.",
+            seo: {
+              keywords: ["трехкомнатная", "Навильи", "Милан", "балкон", "лифт", "класс C"],
+              metaDescription: "Трехкомнатная 72 м² с балконом в Навильи, 3 этаж с лифтом и класс C. Метро 5 минут. Кондо-платежи €150/мес. Цена по запросу."
+            }
+          }, null, 0)
+        }
+      ];
+    } else { // English
+      return [
+        {
+          role: 'user',
+          content: `Facts:
+- Type: sale, property: 3-room apartment
+- Area: 72 m²
+- Floor: 3rd with elevator
+- Outdoor spaces: balcony 8 m²
+- Heating: centralized; Energy class: C
+- Area: Navigli (Milan)
+- Walking distances: metro 5 min, park 1 min
+- Condo fees: €150/month
+- Price: on request`
+        },
+        {
+          role: 'assistant',
+          content: JSON.stringify({
+            title: "3-room 72 m² with balcony, 3rd floor with elevator — Navigli",
+            summary: "In Navigli area, 3-room apartment of 72 m² on 3rd floor with elevator. Balcony 8 m², centralized heating, class C. Metro 5 minutes walk; green area 1 minute away. Condo fees €150/month. Price on request.",
+            description: "Intro: Functional 3-room apartment of 72 m² in the heart of Navigli, on third floor of building with elevator, ideal for those who want services and connections within reach.\n\nInterni: Living room with dining area and kitchen, two bedrooms and bathroom. Bright and well-distributed spaces; centralized heating; energy class C.\n\nEsterni/Servizi: Livable balcony of 8 m², useful for outdoor breakfasts. Well-maintained building with condominium services.\n\nZona/Trasporti: Shops and venues nearby; metro reachable in about 5 minutes walk; green area 1 minute away for walks and sports.\n\nTermini: Condo fees €150/month; price on request. Information is indicative and non-binding.",
+            highlights: [
+              "72 m² 3rd floor with elevator",
+              "Balcony 8 m²",
+              "Energy class C",
+              "Metro 5 minutes",
+              "Condo fees €150/month"
+            ],
+            disclaimer: "The information is indicative and does not constitute a contractual obligation.",
+            seo: {
+              keywords: ["3-room", "Navigli", "Milan", "balcony", "elevator", "class C"],
+              metaDescription: "3-room 72 m² with balcony in Navigli, 3rd floor with elevator and class C. Metro 5 minutes. Condo fees €150/month. Price on request."
+            }
+          }, null, 0)
+        }
+      ];
     }
   }
 

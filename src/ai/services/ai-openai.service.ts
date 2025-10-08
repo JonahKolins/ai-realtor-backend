@@ -28,11 +28,17 @@ export class AiOpenaiService {
   private readonly logger = new Logger(AiOpenaiService.name);
   private readonly openai: OpenAI;
   private readonly model: string;
+  private readonly defaultTemperature: number;
+  private readonly defaultTopP: number;
+  private readonly defaultFrequencyPenalty: number;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('ai.openai.apiKey');
     const baseURL = this.configService.get<string>('ai.openai.baseURL');
     this.model = this.configService.get<string>('ai.openai.model');
+    this.defaultTemperature = this.configService.get<number>('ai.openai.temperature', 0.6);
+    this.defaultTopP = this.configService.get<number>('ai.openai.topP', 0.8);
+    this.defaultFrequencyPenalty = this.configService.get<number>('ai.openai.frequencyPenalty', 0.2);
 
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY environment variable is required');
@@ -72,10 +78,10 @@ export class AiOpenaiService {
         response_format: request.responseFormat === 'json_object' 
           ? { type: 'json_object' } 
           : { type: 'text' },
-        temperature: request.temperature ?? 0.6,
+        temperature: request.temperature ?? this.defaultTemperature,
         max_completion_tokens: request.maxTokens ?? 2000,
-        frequency_penalty: request.frequencyPenalty ?? 0.2,
-        top_p: request.topP ?? 0.8,
+        frequency_penalty: request.frequencyPenalty ?? this.defaultFrequencyPenalty,
+        top_p: request.topP ?? this.defaultTopP,
       });
 
       const responseTime = Date.now() - startTime;

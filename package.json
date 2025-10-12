@@ -27,7 +27,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "stop": "bash scripts/stop.sh",
+    "stop:win": "scripts\\stop.bat"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

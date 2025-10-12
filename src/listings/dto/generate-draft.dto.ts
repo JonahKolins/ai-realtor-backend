@@ -107,22 +107,6 @@ export class ListingDraftDto {
   highlights: string[];
 
   @ApiProperty({
-    description: 'SEO ключевые слова',
-    type: [String],
-    example: ['appartamento', 'affitto Milano', 'trilocale'],
-  })
-  @IsArray()
-  @IsString({ each: true })
-  keywords: string[];
-
-  @ApiProperty({
-    description: 'SEO мета-описание',
-    example: 'Trilocale ristrutturato in centro...',
-  })
-  @IsString()
-  metaDescription: string;
-
-  @ApiProperty({
     description: 'Дисклеймер',
     example: 'Le informazioni sono indicative e non costituiscono vincolo contrattuale.',
   })

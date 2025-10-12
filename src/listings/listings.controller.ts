@@ -19,7 +19,7 @@ import {
   ListingResponseDto, 
   ListListingsResponseDto 
 } from './dto/list-listings.dto';
-import { GenerateDraftDto, ListingDraftDto } from './dto/generate-draft.dto';
+import { GenerateDraftDto, ListingDraftDto, SaveDraftDto } from './dto/generate-draft.dto';
 import { AiDraftService } from '../ai/services/ai-draft.service';
 
 @ApiTags('Listings')
@@ -225,5 +225,41 @@ export class ListingsController {
     
     // Генерация AI-описания
     return this.aiDraftService.generateDraft(listing, generateDraftDto);
+  }
+
+  @Post('save-draft')
+  @ApiOperation({ summary: 'Сохранить черновик объявления' })
+  @ApiResponse({
+    status: 201,
+    description: 'Черновик успешно сохранён',
+    type: ListingResponseDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Черновик успешно обновлён',
+    type: ListingResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Ошибка валидации',
+    example: {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid request parameters'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Объявление не найдено (при обновлении существующего)',
+    example: {
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Listing not found'
+      }
+    }
+  })
+  async saveDraft(@Body() saveDraftDto: SaveDraftDto): Promise<ListingResponseDto> {
+    return this.listingsService.saveDraft(saveDraftDto);
   }
 }

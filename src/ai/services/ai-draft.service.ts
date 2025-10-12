@@ -400,6 +400,8 @@ export class AiDraftService {
       summary,
       description,
       highlights,
+      keywords, // Добавляем keywords как отдельное поле
+      metaDescription, // Добавляем metaDescription как отдельное поле
       disclaimer: draft.disclaimer, // Дисклеймер не санитизируем
       seo: {
         keywords,
@@ -422,6 +424,8 @@ export class AiDraftService {
           'Caratteristiche interessanti',
           'Buona opportunità'
         ],
+        keywords: [listing.propertyType, listing.type === 'SALE' ? 'vendita' : 'affitto', 'immobile'],
+        metaDescription: `${listing.propertyType} ${listing.type === 'SALE' ? 'in vendita' : 'in affitto'}${listing.price ? ` a €${listing.price}` : ''}. Scopri di più.`,
         disclaimer: 'Le informazioni sono indicative e non costituiscono vincolo contrattuale. È necessario verificare tutti i dettagli prima della conclusione.',
         seo: {
           keywords: [listing.propertyType, listing.type === 'SALE' ? 'vendita' : 'affitto', 'immobile'],
@@ -438,6 +442,8 @@ export class AiDraftService {
           'Интересные характеристики',
           'Хорошая возможность'
         ],
+        keywords: [listing.propertyType, listing.type === 'SALE' ? 'продажа' : 'аренда', 'недвижимость'],
+        metaDescription: `${listing.propertyType} ${listing.type === 'SALE' ? 'на продажу' : 'в аренду'}${listing.price ? ` за €${listing.price}` : ''}. Узнать больше.`,
         disclaimer: 'Информация носит ориентировочный характер и не является договорным обязательством. Необходимо проверить все детали перед заключением.',
         seo: {
           keywords: [listing.propertyType, listing.type === 'SALE' ? 'продажа' : 'аренда', 'недвижимость'],
@@ -454,6 +460,8 @@ export class AiDraftService {
           'Interesting features',
           'Good opportunity'
         ],
+        keywords: [listing.propertyType, listing.type === 'SALE' ? 'sale' : 'rent', 'property'],
+        metaDescription: `${listing.propertyType} for ${listing.type === 'SALE' ? 'sale' : 'rent'}${listing.price ? ` at €${listing.price}` : ''}. Learn more.`,
         disclaimer: 'The information is indicative and does not constitute a contractual obligation. All details must be verified before conclusion.',
         seo: {
           keywords: [listing.propertyType, listing.type === 'SALE' ? 'sale' : 'rent', 'property'],

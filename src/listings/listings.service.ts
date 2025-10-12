@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { ListListingsDto, ListingResponseDto, ListListingsResponseDto } from './dto/list-listings.dto';
+import { SaveDraftDto } from './dto/generate-draft.dto';
 import { ListingType, ListingStatus, ListingSortOrder } from './types/listing.types';
 
 // Собственные энумы для типобезопасности
@@ -17,6 +18,28 @@ export enum PrismaListingStatus {
   ARCHIVED = 'ARCHIVED',
 }
 
+// Расширенный тип для работы с новыми полями
+interface ExtendedListing {
+  id: string;
+  type: string;
+  propertyType: string;
+  status: string;
+  title: string | null;
+  summary: string | null;
+  description: string | null;
+  highlights: string[];
+  keywords: string[];
+  metaDescription: string | null;
+  price: any;
+  photos: string[];
+  documents: string[];
+  userFields: any;
+  aiHints: any;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
 @Injectable()
 export class ListingsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -27,11 +50,18 @@ export class ListingsService {
         type: this.mapTypeToEnum(createListingDto.type),
         propertyType: createListingDto.propertyType || 'default',
         title: createListingDto.title,
+        summary: createListingDto.summary,
+        description: createListingDto.description,
+        highlights: createListingDto.highlights || [],
+        keywords: createListingDto.keywords || [],
+        metaDescription: createListingDto.metaDescription,
         price: createListingDto.price,
+        photos: createListingDto.photos || [],
+        documents: createListingDto.documents || [],
         userFields: createListingDto.userFields,
         status: PrismaListingStatus.DRAFT,
-      },
-    });
+      } as any,
+    }) as ExtendedListing;
 
     return this.mapToResponse(listing);
   }
@@ -74,7 +104,7 @@ export class ListingsService {
         orderBy,
         skip,
         take: limit,
-      }),
+      }) as Promise<ExtendedListing[]>,
       this.prisma.listing.count({ where }),
     ]);
 
@@ -92,7 +122,7 @@ export class ListingsService {
         id,
         deletedAt: null,
       },
-    });
+    }) as ExtendedListing | null;
 
     if (!listing) {
       throw new NotFoundException('Listing not found');
@@ -109,7 +139,7 @@ export class ListingsService {
         // В будущем можно добавить проверку владельца
         // ...(userId && { ownerId: userId }),
       },
-    });
+    }) as ExtendedListing | null;
 
     if (!listing) {
       throw new NotFoundException('Listing not found');
@@ -122,7 +152,14 @@ export class ListingsService {
       propertyType: listing.propertyType,
       status: listing.status,
       title: listing.title,
+      summary: listing.summary,
+      description: listing.description,
+      highlights: listing.highlights || [],
+      keywords: listing.keywords || [],
+      metaDescription: listing.metaDescription,
       price: listing.price ? Number(listing.price) : null,
+      photos: listing.photos || [],
+      documents: listing.documents || [],
       userFields: listing.userFields as Record<string, any> | null,
       createdAt: listing.createdAt,
       updatedAt: listing.updatedAt,
@@ -136,7 +173,7 @@ export class ListingsService {
         id,
         deletedAt: null,
       },
-    });
+    }) as ExtendedListing | null;
 
     if (!existingListing) {
       throw new NotFoundException('Listing not found');
@@ -169,8 +206,36 @@ export class ListingsService {
       updateData.title = updateListingDto.title;
     }
 
+    if (updateListingDto.summary !== undefined) {
+      updateData.summary = updateListingDto.summary;
+    }
+
+    if (updateListingDto.description !== undefined) {
+      updateData.description = updateListingDto.description;
+    }
+
+    if (updateListingDto.highlights !== undefined) {
+      updateData.highlights = updateListingDto.highlights;
+    }
+
+    if (updateListingDto.keywords !== undefined) {
+      updateData.keywords = updateListingDto.keywords;
+    }
+
+    if (updateListingDto.metaDescription !== undefined) {
+      updateData.metaDescription = updateListingDto.metaDescription;
+    }
+
     if (updateListingDto.price !== undefined) {
       updateData.price = updateListingDto.price;
+    }
+
+    if (updateListingDto.photos !== undefined) {
+      updateData.photos = updateListingDto.photos;
+    }
+
+    if (updateListingDto.documents !== undefined) {
+      updateData.documents = updateListingDto.documents;
     }
 
     if (updateListingDto.userFields) {
@@ -180,9 +245,103 @@ export class ListingsService {
     const listing = await this.prisma.listing.update({
       where: { id },
       data: updateData,
-    });
+    }) as ExtendedListing;
 
     return this.mapToResponse(listing);
+  }
+
+  async saveDraft(saveDraftDto: SaveDraftDto): Promise<ListingResponseDto> {
+    if (saveDraftDto.id) {
+      // Обновляем существующий черновик
+      const existingListing = await this.prisma.listing.findFirst({
+        where: {
+          id: saveDraftDto.id,
+          deletedAt: null,
+        },
+      }) as ExtendedListing | null;
+
+      if (!existingListing) {
+        throw new NotFoundException('Listing not found');
+      }
+
+      const updateData: any = {};
+
+      if (saveDraftDto.type) {
+        updateData.type = this.mapTypeToEnum(saveDraftDto.type as ListingType);
+      }
+
+      if (saveDraftDto.propertyType !== undefined) {
+        updateData.propertyType = saveDraftDto.propertyType;
+      }
+
+      if (saveDraftDto.title !== undefined) {
+        updateData.title = saveDraftDto.title;
+      }
+
+      if (saveDraftDto.summary !== undefined) {
+        updateData.summary = saveDraftDto.summary;
+      }
+
+      if (saveDraftDto.description !== undefined) {
+        updateData.description = saveDraftDto.description;
+      }
+
+      if (saveDraftDto.highlights !== undefined) {
+        updateData.highlights = saveDraftDto.highlights;
+      }
+
+      if (saveDraftDto.keywords !== undefined) {
+        updateData.keywords = saveDraftDto.keywords;
+      }
+
+      if (saveDraftDto.metaDescription !== undefined) {
+        updateData.metaDescription = saveDraftDto.metaDescription;
+      }
+
+      if (saveDraftDto.price !== undefined) {
+        updateData.price = saveDraftDto.price;
+      }
+
+      if (saveDraftDto.photos !== undefined) {
+        updateData.photos = saveDraftDto.photos;
+      }
+
+      if (saveDraftDto.documents !== undefined) {
+        updateData.documents = saveDraftDto.documents;
+      }
+
+      if (saveDraftDto.userFields) {
+        updateData.userFields = saveDraftDto.userFields;
+      }
+
+      const listing = await this.prisma.listing.update({
+        where: { id: saveDraftDto.id },
+        data: updateData,
+      }) as ExtendedListing;
+
+      return this.mapToResponse(listing);
+    } else {
+      // Создаём новый черновик
+      const listing = await this.prisma.listing.create({
+        data: {
+          type: saveDraftDto.type ? this.mapTypeToEnum(saveDraftDto.type as ListingType) : PrismaListingType.SALE,
+          propertyType: saveDraftDto.propertyType || 'default',
+          title: saveDraftDto.title,
+          summary: saveDraftDto.summary,
+          description: saveDraftDto.description,
+          highlights: saveDraftDto.highlights || [],
+          keywords: saveDraftDto.keywords || [],
+          metaDescription: saveDraftDto.metaDescription,
+          price: saveDraftDto.price,
+          photos: saveDraftDto.photos || [],
+          documents: saveDraftDto.documents || [],
+          userFields: saveDraftDto.userFields,
+          status: PrismaListingStatus.DRAFT,
+        } as any,
+      }) as ExtendedListing;
+
+      return this.mapToResponse(listing);
+    }
   }
 
   async softDelete(id: string): Promise<void> {
@@ -191,7 +350,7 @@ export class ListingsService {
         id,
         deletedAt: null,
       },
-    });
+    }) as ExtendedListing | null;
 
     if (!existingListing) {
       throw new NotFoundException('Listing not found');
@@ -206,14 +365,21 @@ export class ListingsService {
     });
   }
 
-  private mapToResponse(listing: any): ListingResponseDto {
+  private mapToResponse(listing: ExtendedListing): ListingResponseDto {
     return {
       id: listing.id,
       type: this.mapTypeFromEnum(listing.type),
       propertyType: listing.propertyType,
       status: this.mapStatusFromEnum(listing.status),
       title: listing.title,
+      summary: listing.summary,
+      description: listing.description,
+      highlights: listing.highlights || [],
+      keywords: listing.keywords || [],
+      metaDescription: listing.metaDescription,
       price: listing.price ? Number(listing.price) : null,
+      photos: listing.photos || [],
+      documents: listing.documents || [],
       userFields: listing.userFields as Record<string, any> | null,
       createdAt: listing.createdAt.toISOString(),
       updatedAt: listing.updatedAt.toISOString(),

@@ -117,8 +117,29 @@ export class ListingResponseDto {
   @ApiProperty({ description: 'Заголовок', example: '2-комнатная в центре', nullable: true })
   title: string | null;
 
+  @ApiProperty({ description: 'Краткое описание', example: 'Trilocale ristrutturato...', nullable: true })
+  summary: string | null;
+
+  @ApiProperty({ description: 'Полное описание', example: 'A due passi da Porta Romana...', nullable: true })
+  description: string | null;
+
+  @ApiProperty({ description: 'Ключевые особенности', example: ['Cucina abitabile', 'Doppia esposizione'], nullable: true })
+  highlights: string[] | null;
+
+  @ApiProperty({ description: 'SEO ключевые слова', example: ['appartamento', 'affitto Milano'], nullable: true })
+  keywords: string[] | null;
+
+  @ApiProperty({ description: 'SEO мета-описание', example: 'Trilocale ristrutturato in centro...', nullable: true })
+  metaDescription: string | null;
+
   @ApiProperty({ description: 'Цена', example: 250000, nullable: true })
   price: number | null;
+
+  @ApiProperty({ description: 'Фотографии', example: ['photo1.jpg', 'photo2.jpg'], nullable: true })
+  photos: string[] | null;
+
+  @ApiProperty({ description: 'Документы', example: ['document1.pdf', 'document2.pdf'], nullable: true })
+  documents: string[] | null;
 
   @ApiProperty({ description: 'Пользовательские поля', example: { city: 'Milano' }, nullable: true })
   userFields: Record<string, any> | null;

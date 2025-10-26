@@ -9,8 +9,10 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiCookieAuth } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
@@ -24,6 +26,8 @@ import { AiDraftService } from '../ai/services/ai-draft.service';
 
 @ApiTags('Listings')
 @Controller('listings')
+@UseGuards(AuthGuard)
+@ApiCookieAuth('sid')
 export class ListingsController {
   constructor(
     private readonly listingsService: ListingsService,

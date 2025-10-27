@@ -32,6 +32,8 @@
     "stop:win": "scripts\\stop.bat"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.917.0",
+    "@aws-sdk/s3-request-presigner": "^3.917.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
@@ -42,16 +44,21 @@
     "@prisma/client": "^5.7.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/csurf": "^1.11.5",
+    "@types/multer": "^2.0.0",
+    "@types/uuid": "^10.0.0",
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.7",
     "csurf": "^1.11.0",
     "helmet": "^8.1.0",
+    "multer": "^2.0.2",
     "openai": "^5.21.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "swagger-ui-express": "^5.0.0"
+    "sharp": "^0.34.4",
+    "swagger-ui-express": "^5.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

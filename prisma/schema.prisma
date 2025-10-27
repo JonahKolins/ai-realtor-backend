@@ -22,13 +22,16 @@ model Listing {
   keywords       String[]  // SEO ключевые слова
   metaDescription String?  @db.VarChar(160) // SEO мета-описание
   price          Decimal?  @db.Decimal(14,2)
-  photos         String[]  // медиа файлы - фотографии
+  photos         String[]  // медиа файлы - фотографии (deprecated, используется Photo)
   documents      String[]  // медиа файлы - документы
   userFields     Json?     // произвольные поля пользователя (city, floor, balcony и т.п.)
   aiHints        Json?     // зарезервировано под будущие подсказки ИИ
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   deletedAt      DateTime?
+
+  // Relations
+  photoEntries   Photo[]   // новая система управления фотографиями
 
   @@index([status, createdAt])
   @@index([type])
@@ -84,4 +87,38 @@ model Session {
 enum UserStatus {
   ACTIVE
   BLOCKED
+}
+
+model Photo {
+  id                String      @id @default(uuid())
+  listingId         String      @map("listing_id")
+  s3KeyOriginal     String?     @map("s3_key_original") @db.Text
+  s3KeyVariants     Json?       @map("s3_key_variants")
+  mime              String?     @db.VarChar(50)
+  width             Int?
+  height            Int?
+  sizeBytes         BigInt?     @map("size_bytes")
+  status            PhotoStatus @default(UPLOADING)
+  isCover           Boolean     @default(false) @map("is_cover")
+  sortOrder         Int         @default(0) @map("sort_order")
+  originalName      String?     @map("original_name") @db.VarChar(255)
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  uploadedBy        String?     @map("uploaded_by")
+  
+  // Relations
+  listing           Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  @@index([listingId])
+  @@index([status])
+  @@index([isCover])
+  @@index([sortOrder])
+  @@map("photos")
+}
+
+enum PhotoStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
 }

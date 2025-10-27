@@ -6,6 +6,7 @@ import { SystemModule } from './system/system.module';
 import { ListingsModule } from './listings/listings.module';
 import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
+import { PhotosModule } from './photos/photos.module';
 import { PrismaService } from './prisma/prisma.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -34,6 +35,7 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
     ListingsModule,
     AiModule,
     AuthModule,
+    PhotosModule,
   ],
   providers: [
     PrismaService,

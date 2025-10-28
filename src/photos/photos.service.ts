@@ -367,10 +367,9 @@ export class PhotosService {
       // Загружаем обработанные варианты в S3
       const variants: PhotoVariants = {};
       for (const variant of processingResult.variants) {
-        const buffer = await this.s3Service.getObject(variant.key);
         await this.s3Service.uploadObject(
           variant.key,
-          buffer,
+          variant.buffer,
           `image/${variant.format}`,
           'public, max-age=31536000, immutable'
         );

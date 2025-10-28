@@ -36,6 +36,7 @@ export interface ProcessedImageVariant {
   height: number;
   size: number;
   format: string;
+  buffer: Buffer;
 }
 
 export interface ImageProcessingResult {

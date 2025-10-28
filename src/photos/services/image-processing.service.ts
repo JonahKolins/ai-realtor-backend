@@ -19,12 +19,12 @@ export class ImageProcessingService {
   constructor(private configService: ConfigService) {
     this.config = {
       quality: {
-        webp: this.configService.get<number>('IMAGE_QUALITY_WEBP', 85),
-        avif: this.configService.get<number>('IMAGE_QUALITY_AVIF', 75),
+        webp: Number(this.configService.get('IMAGE_QUALITY_WEBP', '85')),
+        avif: Number(this.configService.get('IMAGE_QUALITY_AVIF', '75')),
       },
       sizes: ['w1600', 'w1024', 'w512'],
       formats: ['webp', 'avif'],
-      maxFileSize: this.configService.get<number>('MEDIA_MAX_FILE_SIZE_MB', 20) * 1024 * 1024,
+      maxFileSize: Number(this.configService.get('MEDIA_MAX_FILE_SIZE_MB', '20')) * 1024 * 1024,
       maxDimension: 8000,
       minDimension: 100,
     };
@@ -208,6 +208,7 @@ export class ImageProcessingService {
       height: metadata.height || 0,
       size: buffer.length,
       format,
+      buffer,
     };
   }
 

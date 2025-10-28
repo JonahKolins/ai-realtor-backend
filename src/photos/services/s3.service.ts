@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import {
   S3Client,
   PutObjectCommand,
@@ -240,7 +241,8 @@ export class S3Service {
    * Генерирует уникальный ID для фотографии
    */
   private generatePhotoId(): string {
-    return `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Используем стандартную функцию генерации UUID из crypto
+    return randomUUID();
   }
 
   /**

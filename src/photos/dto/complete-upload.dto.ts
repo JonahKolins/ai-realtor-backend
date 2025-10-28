@@ -14,7 +14,7 @@ import { ALLOWED_MIME_TYPES, AllowedMimeType } from '../types/photo.types';
 export class CompleteUploadDto {
   @ApiProperty({
     description: 'ID ассета из слота загрузки',
-    example: 'photo-uuid-1',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsUUID()
   assetId: string;
@@ -88,8 +88,8 @@ export class CompleteUploadResponseDto {
   status: 'QUEUED' | 'PROCESSING';
 
   @ApiProperty({
-    description: 'ID созданной записи фотографии',
-    example: 'photo-uuid-1',
+    description: 'ID созданной записи фотографии', 
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   photoId: string;
 }

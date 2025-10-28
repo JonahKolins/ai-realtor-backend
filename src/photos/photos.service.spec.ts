@@ -100,13 +100,13 @@ describe('PhotosService', () => {
 
       const mockSlots = [
         {
-          assetId: 'photo-1',
-          key: 'uploads/users/user-1/listings/listing-1/photo-1/orig.jpg',
+          assetId: '550e8400-e29b-41d4-a716-446655440001',
+          key: 'uploads/users/user-1/listings/listing-1/550e8400-e29b-41d4-a716-446655440001/orig.jpg',
           uploadUrl: 'https://s3.amazonaws.com/upload-url-1',
         },
         {
-          assetId: 'photo-2',
-          key: 'uploads/users/user-1/listings/listing-1/photo-2/orig.png',
+          assetId: '550e8400-e29b-41d4-a716-446655440002',
+          key: 'uploads/users/user-1/listings/listing-1/550e8400-e29b-41d4-a716-446655440002/orig.png',
           uploadUrl: 'https://s3.amazonaws.com/upload-url-2',
         },
       ];
@@ -176,7 +176,7 @@ describe('PhotosService', () => {
       const listingId = 'listing-1';
       const mockPhotos = [
         {
-          id: 'photo-1',
+          id: '550e8400-e29b-41d4-a716-446655440001',
           listingId,
           status: PhotoStatus.READY,
           isCover: true,
@@ -186,7 +186,7 @@ describe('PhotosService', () => {
           height: 1067,
           s3KeyVariants: {
             webp: {
-              w1600: 'processed/users/user-1/listings/listing-1/photo-1/w1600.webp',
+              w1600: 'processed/users/user-1/listings/listing-1/550e8400-e29b-41d4-a716-446655440001/w1600.webp',
             },
           },
           createdAt: new Date(),
@@ -202,7 +202,7 @@ describe('PhotosService', () => {
       // Assert
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id: 'photo-1',
+        id: '550e8400-e29b-41d4-a716-446655440001',
         status: PhotoStatus.READY,
         isCover: true,
         sortOrder: 0,
@@ -223,12 +223,12 @@ describe('PhotosService', () => {
     it('should update photo order successfully', async () => {
       // Arrange
       const listingId = 'listing-1';
-      const dto = { ids: ['photo-1', 'photo-2', 'photo-3'] };
+      const dto = { ids: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003'] };
       
       mockPrismaService.photo.findMany.mockResolvedValue([
-        { id: 'photo-1', listingId },
-        { id: 'photo-2', listingId },
-        { id: 'photo-3', listingId },
+        { id: '550e8400-e29b-41d4-a716-446655440001', listingId },
+        { id: '550e8400-e29b-41d4-a716-446655440002', listingId },
+        { id: '550e8400-e29b-41d4-a716-446655440003', listingId },
       ]);
       mockPrismaService.photo.update.mockResolvedValue({});
 
@@ -243,11 +243,11 @@ describe('PhotosService', () => {
     it('should throw error if some photos not found', async () => {
       // Arrange
       const listingId = 'listing-1';
-      const dto = { ids: ['photo-1', 'photo-2'] };
+      const dto = { ids: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'] };
       
       mockPrismaService.photo.findMany.mockResolvedValue([
-        { id: 'photo-1', listingId },
-        // photo-2 отсутствует
+        { id: '550e8400-e29b-41d4-a716-446655440001', listingId },
+        // 550e8400-e29b-41d4-a716-446655440002 отсутствует
       ]);
 
       // Act & Assert

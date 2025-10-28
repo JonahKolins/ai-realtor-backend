@@ -33,7 +33,7 @@ export class CreateUploadSlotsDto {
 export class UploadSlotResponseDto {
   @ApiProperty({
     description: 'Уникальный идентификатор слота',
-    example: 'photo-uuid-1',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   assetId: string;
 

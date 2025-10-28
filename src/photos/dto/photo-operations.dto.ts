@@ -14,7 +14,7 @@ export class UpdatePhotoOrderDto {
   @ApiProperty({
     description: 'Массив ID фотографий в желаемом порядке',
     type: [String],
-    example: ['photo-uuid-3', 'photo-uuid-1', 'photo-uuid-2'],
+    example: ['550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
   })
   @IsArray()
   @IsUUID('4', { each: true })

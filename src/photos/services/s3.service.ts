@@ -169,6 +169,18 @@ export class S3Service {
       this.logger.log(`Successfully uploaded object to S3: ${key}`);
     } catch (error) {
       this.logger.error(`Failed to upload object to S3 ${key}:`, error);
+      
+      // Детальная информация об ошибке для диагностики
+      if (error.name === 'AccessDenied') {
+        this.logger.error(`S3 Access Denied Details:`, {
+          bucket: this.bucketName,
+          key: key,
+          action: 'PutObject',
+          region: this.region,
+          errorMessage: error.message
+        });
+      }
+      
       throw new Error('Failed to upload to S3');
     }
   }
